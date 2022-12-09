@@ -1,5 +1,6 @@
 import mechanicalsoup
 import requests, re
+import string
 import pandas as pd
 from bs4 import BeautifulSoup
 import numpy as np
@@ -42,4 +43,11 @@ Hasla2=pd.concat([dfh5, dfh6.reindex(dfh5.index)], axis=1).iloc[0:50]
 Halsa=Hasla
 Hasla2=Hasla2
 
-Hasla2.to_csv('HaslametricsAway.csv')
+Hasla_Combined = pd.concat([Hasla, Hasla2], axis=1, join='inner')
+Hasla_Combined.columns = ['Home', 'HScore', 'Away', 'AScore']
+
+Hasla_Combined['Home'] = Hasla_Combined['Home'].str.rstrip(string.digits)
+Hasla_Combined['Away'] = Hasla_Combined['Away'].str.rstrip(string.digits)
+#Hasla_Combined.to_csv('HaslametricsCombined.csv')
+
+print(Hasla_Combined)

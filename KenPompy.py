@@ -1,16 +1,17 @@
+import kenpompy
 import mechanicalsoup
 import requests, re
 import pandas as pd
 from bs4 import BeautifulSoup
 import numpy as np
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import TimeoutException
 
-import kenpompy as kp
+headers = {
+    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 11_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36'}
 
 from kenpompy.utils import login
 browser = login("ryanfdougherty@gmail.com","StraightCash22")
 
+#df_fanmatch = kenpompy.FanMatch.FanMatch(browser)
+
+tester = kenpompy.summary.get_height(browser, season=None)
+print(tester)
