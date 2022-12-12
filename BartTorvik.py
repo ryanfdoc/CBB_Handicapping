@@ -1,57 +1,50 @@
-import mechanicalsoup
-import requests, re
 import pandas as pd
-from bs4 import BeautifulSoup
 import numpy as np
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import TimeoutException
-
-#Get BartTorvik Projections for Today
-driver = webdriver.Chrome("/opt/anaconda3/bin/chromedriver 2") #path to webdriver
-driver.get('https://barttorvik.com/schedule.php')
-
-list_category_elements = driver.find_element("xpath", '/html/body/div/div/p[4]/table/tbody')  # finds torvik table elements
-links = list_category_elements.find_elements(By.TAG_NAME ,'a')
-links_values3 =[]
-for i in range(len(links)):
-
-    links_values3.append(links[i].text)
+import requests, re
 
 
-dft = pd.DataFrame(links_values3)
-dft = pd.DataFrame(np.array((links_values3)),
-                 columns=['team1'])
+url = "https://barttorvik.com/schedule.php"
+dfs = pd.read_html(url)
 
-links_values3 = np.array(links_values3)
-
-print(dft.iloc[0:20])
-
-#creates torvik df
-dft2 = dft.team1.str.split(expand=True)
-print(dft2)
-dft2 = pd.DataFrame(dft.team1.str.split('\n',1).tolist(),
-                         columns = ['Teams','PredictedScore'])
-print(dft2)
-Tovrik = dft2.iloc[2::4]
-print(Tovrik)
-Tovrik.columns = ['score1','score2']
-print(Tovrik)
-
-TovrikF = pd.DataFrame(Tovrik.score2.str.rsplit('-',n=2,expand=True))
-TovrikF.columns = ['score1','score2']
-TovrikFinal2 = pd.DataFrame(TovrikF.score2.str.rsplit('(',n=2,expand=True))
-Tovrikcombo = pd.concat([Tovrik, TovrikF.reindex(Tovrik.index)], axis=1).iloc[0:50]
-Tovrikx = pd.concat([Tovrikcombo, TovrikFinal2.reindex(Tovrikcombo.index)], axis=1).iloc[0:50]
-Tovrikx.columns = ['Team','Pred','Score1','-','Score2','-']
+#Create Dataframe and Drop Unnecessary Columns
+df = dfs[0]
+df = df.rename(columns={'Matchup': 'Away'})
+df.drop(['Time (CT)', 'TTQ', 'Result'], axis=1, inplace=True)
+df[['Away', 'Home']] = df['Away'].str.split(' at | vs ',expand=True)
 
 
+#Format Home and Away Columns, Reorder Dataframe
+#Remove Special Characters and Numbers
+df['Away'] = df['Away'].str.replace(r'\d+', r'', regex=True)
+df['Home'] = df['Home'].str.replace(r'\d+', r'', regex=True)
+df['Home'] = df['Home'].str.replace(r'[!,*)@#%($_?^+]', r'', regex=True)
 
-TovFinal = Tovrikx
-TovFinal.drop(TovFinal.columns[[1,3,5]], axis=1, inplace=True)
+#Remove Broadcaster Substring
+df['Home'] = df['Home'].replace(r' ESPN', r'', regex=True)
+df['Home'] = df['Home'].replace(r' ACCN', r'', regex=True)
+df['Home'] = df['Home'].replace(r' ABC', r'', regex=True)
+df['Home'] = df['Home'].replace(r' ACCN', r'', regex=True)
+df['Home'] = df['Home'].replace(r' ACCNX', r'', regex=True)
+df['Home'] = df['Home'].replace(r' BIG12ESPN', r'', regex=True)
+df['Home'] = df['Home'].replace(r' BTN', r'', regex=True)
+df['Home'] = df['Home'].replace(r' CBSSN', r'', regex=True)
+df['Home'] = df['Home'].replace(r' FOX', r'', regex=True)
+df['Home'] = df['Home'].replace(r' FS', r'', regex=True)
+df['Home'] = df['Home'].replace(r' LHN', r'', regex=True)
+df['Home'] = df['Home'].replace(r' PAC', r'', regex=True)
+df['Home'] = df['Home'].replace(r' Peacock', r'', regex=True)
+df['Home'] = df['Home'].replace(r' SECN', r'', regex=True)
 
+#Reorder Dataframe
+df = df[['Away', 'Home', 'T-Rank Line']]
 
-#TovFinal.to_csv('BartTovik.csv')
-#print(TovFinal)
+#Reformat T-Rank Line to expand Dataframe and make all data usable
+# EXAMPLE FORMAT: "Creighton -1.2, 69-67 (55%)"
+df = df.rename(columns={'T-Rank Line': 'BT_Fav'})
+df[['BT_Fav', 'BT_Spread', 'Fav_Score', 'Dog_Score', 'BT_XWin']] = df['BT_Fav'].str.split('[-|,|-|;|(]',expand=True)
+df['BT_Spread'] = df['BT_Spread'].replace(r'[!,*)@#%($_?^+]', r'', regex=True)
+df['BT_Spread'] = df['BT_Spread'].replace(r'100', r'', regex=True)
+df['BT_XWin'] = df['BT_XWin'].replace(r'[!,*)@#($_?^+]', r'', regex=True)
+
+#Print to CSV
+df.to_csv("bart_test.csv")
