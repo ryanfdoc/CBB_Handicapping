@@ -17,9 +17,9 @@ driver.get('https://kenpom.com/index.php')
 driver.find_element("xpath", '/html/body/div/div[1]/div[1]/div[1]/form')
 e = driver.find_element("xpath", '/html/body/div/div[1]/div[1]/div[1]/form/input[1]')
 print(e)
-e.send_keys("ryanfdougherty@gmail.com") #kenpom username
+e.send_keys("") #kenpom username
 e = driver.find_element("xpath", '/html/body/div/div[1]/div[1]/div[1]/form/input[2]')
-e.send_keys("StraightCash22") #kenpom password
+e.send_keys("") #kenpom password
 e = driver.find_element("xpath", '/html/body/div/div[1]/div[1]/div[1]/form/input[3]')
 e.click()
 
