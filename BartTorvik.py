@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import requests, re
 
-
+#Grab URL and Store Table into Temp Dataframe
 url = "https://barttorvik.com/schedule.php"
 dfs = pd.read_html(url)
 
@@ -45,6 +45,21 @@ df[['BT_Fav', 'BT_Spread', 'Fav_Score', 'Dog_Score', 'BT_XWin']] = df['BT_Fav'].
 df['BT_Spread'] = df['BT_Spread'].replace(r'[!,*)@#%($_?^+]', r'', regex=True)
 df['BT_Spread'] = df['BT_Spread'].replace(r'100', r'', regex=True)
 df['BT_XWin'] = df['BT_XWin'].replace(r'[!,*)@#($_?^+]', r'', regex=True)
+
+#Strip Whitespace from Pred_Score Columns
+df['Fav_Score'] = df['Fav_Score'].str.replace(r'\W+', r'', regex=True)
+df['Dog_Score'] = df['Dog_Score'].str.replace(r'\W+', r'', regex=True)
+#Strip Leading and Trailing Spaces from String Columns
+df['Home'] = df['Home'].replace(r"^ +| +$", r"", regex=True)
+df['BT_Fav'] = df['BT_Fav'].replace(r"^ +| +$", r"", regex=True)
+
+#Convert Columns to Appropriate Data Type
+df['BT_Spread'] = pd.to_numeric(df['BT_Spread'], errors='coerce')
+df['Fav_Score'] = pd.to_numeric(df['Fav_Score'], errors='coerce')
+df['Dog_Score'] = pd.to_numeric(df['Dog_Score'], errors='coerce')
+
+#Create Implied Total Column
+df['BT_Total'] = df['Fav_Score'] + df['Dog_Score']
 
 #Print to CSV
 df.to_csv("bart_test.csv")
