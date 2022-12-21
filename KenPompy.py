@@ -9,7 +9,7 @@ headers = {
     'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 11_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36'}
 
 from kenpompy.utils import login
-browser = login("ryanfdougherty@gmail.com","StraightCash22")
+browser = login("","")
 
 #df_fanmatch = kenpompy.FanMatch.FanMatch(browser)
 
